@@ -97,8 +97,7 @@ dim(dfm_newstweets)
 
 #### estimate the Wordfish model ####
 set.seed(123L)
-dfm_newstweets_results <- textmodel_wordfish(dfm_newstweets, 
-                                             sparse = TRUE)
+dfm_newstweets_results <- textmodel_wordfish(dfm_newstweets) # removed argument "sparse = TRUE"0
 
 ```
 
@@ -177,15 +176,35 @@ dim(kaneko_dfm_study1)
 ```{r}
 ## estimate the Wordfish model
 
+# compress the document-feature matrix at the newspaper level
+dfm_newstweets <- dfm_group(kaneko_dfm_study1, groups = Newspaper)
+
+# remove words not used by two or more newspapers
+dfm_newstweets <- dfm_trim(dfm_newstweets, 
+                                min_docfreq = 2, docfreq_type = "count")
+
+## size of the document-feature matrix
+dim(dfm_newstweets)
+
+#### estimate the Wordfish model ####
+set.seed(123L)
+kaneko_newstweets_results <- textmodel_wordfish(dfm_newstweets)
+
+summary(kaneko_newstweets_results)
+
 ```
-Write a paragraph here explaining and interpreting your results 
+Interpretation of results:
+The theta seems to be estimating the "right-wingness" of the newspapers with newspapers like Chugoku and Asahi being relatively left-wing while newspapers like Yomiuri and Nikkei fall more on the right. These results are broadly coherent with both the theta scores of the paper as well as their hard-coded expectations of political leanings.
 
 2. Visualize the results
-```{r, fig.cap="Wordfish model estimates of Japanese newspapers' editorial texts}
+```{r}
 ## We can then plot our estimates of the thetas---i.e., the estimates of the latent Japanese newspaper position.
-```
 
-Write here the interpretation of your plot(s)
+textplot_scale1d(kaneko_newstweets_results)
+
+```
+interpretation of the plot:
+The plot reflects the data above (as it should). Nevertheless, I am somewhat critical of the concept validity of these wordfish models as even the theoretical concept of left and right is contested. Since this is an unsupervised model, it could very well just be picking up any other latent structure for scaling - such as the tabloid to newspaper spectrum above.
 
 Don't forget to knit!
 
